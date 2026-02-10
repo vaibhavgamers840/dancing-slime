@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infinite Party Slime</title>
+    <title>Hookah Bar Cat</title>
     <style>
         body {
             margin: 0;
@@ -13,71 +13,51 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Courier New', Courier, monospace;
             color: white;
             cursor: pointer;
         }
 
-        /* --- THE DANCING SLIME --- */
+        /* --- THE DANCING CAT --- */
         .pet-container {
             position: relative;
             transition: all 0.1s ease-out;
             z-index: 10;
         }
 
-        .slime {
-            width: 150px;
-            height: 120px;
-            background: linear-gradient(135deg, #555, #333);
-            border-radius: 50% 50% 40% 40%;
-            position: relative;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            /* Static until clicked */
-            transition: background 1s, filter 0.5s, box-shadow 1s;
+        .cat {
+            font-size: 20px;
+            white-space: pre;
+            line-height: 1.2;
+            text-shadow: 0 0 10px #ff00ff;
+            /* Transition for color changes */
+            transition: color 0.3s, text-shadow 0.3s;
+            color: #00ffcc;
         }
 
-        /* --- FACE --- */
-        .eye {
-            width: 18px;
-            height: 18px;
-            background: white;
-            border-radius: 50%;
-            position: absolute;
-            top: 40px;
-            transition: all 0.2s;
+        /* --- DANCE ANIMATIONS SYNCED TO HOOKAH BAR --- */
+        
+        /* 1. Slow Sway (Idle/Verses) */
+        .dancing .cat {
+            animation: sway 1.2s infinite alternate ease-in-out;
         }
-        .eye.left { left: 40px; }
-        .eye.right { right: 40px; }
-        .pupil {
-            width: 8px;
-            height: 8px;
-            background: #111;
-            border-radius: 50%;
-            position: absolute;
-            top: 4px;
-            left: 5px;
+        @keyframes sway {
+            0% { transform: rotate(-5deg) translateY(0); }
+            100% { transform: rotate(5deg) translateY(-20px); }
         }
 
-        /* --- DANCE ANIMATIONS --- */
-        .dancing .slime {
-            animation: bounce 0.6s infinite alternate ease-in-out;
+        /* 2. Fast Rave (Chorus) */
+        .fast-rave {
+            animation: rave 0.4s infinite alternate ease-in-out !important;
+        }
+        @keyframes rave {
+            0% { transform: scale(1.1) rotate(-15deg); }
+            100% { transform: scale(0.9) rotate(15deg) translateY(-30px); }
         }
 
-        @keyframes bounce {
-            from { transform: scaleX(1) translateY(0); }
-            to { transform: scaleX(1.1) translateY(-30px); }
-        }
-
-        .wiggle-mode {
-            animation: wiggle 0.4s infinite alternate ease-in-out !important;
-        }
-        @keyframes wiggle {
-            from { transform: rotate(-15deg); }
-            to { transform: rotate(15deg) scale(1.1); }
-        }
-
+        /* 3. Spin (Bridge) */
         .spin-mode {
-            animation: spin 1s infinite linear !important;
+            animation: spin 0.8s infinite linear !important;
         }
         @keyframes spin {
             from { transform: rotate(0deg); }
@@ -91,11 +71,11 @@
             height: 5px;
             border-radius: 50%;
             pointer-events: none;
-            animation: fly 2s infinite linear;
+            animation: fly 1.5s infinite linear;
         }
         @keyframes fly {
             0% { transform: translateY(0) scale(1); opacity: 1; }
-            100% { transform: translateY(-200px) scale(0); opacity: 0; }
+            100% { transform: translateY(-300px) scale(0); opacity: 0; }
         }
 
         #ui {
@@ -103,68 +83,71 @@
             bottom: 30px;
             letter-spacing: 2px;
             text-transform: uppercase;
-            font-size: 14px;
+            font-size: 16px;
+            font-weight: bold;
             text-align: center;
             pointer-events: none;
+            text-shadow: 0 0 10px #ff00ff;
         }
     </style>
 </head>
 <body>
 
     <div class="pet-container" id="container">
-        <div class="slime" id="slime">
-            <div class="eye left"><div class="pupil"></div></div>
-            <div class="eye right"><div class="pupil"></div></div>
+        <div class="cat" id="cat">
+ /\_/\
+( o.o )
+ > ^ <
         </div>
     </div>
 
-    <div id="ui">CLICK SLIME TO PARTY!</div>
+    <div id="ui">CLICK TO DANCE</div>
 
     <audio id="party-music" loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+        <source src="http://googleusercontent.com/file_content/18" type="audio/mpeg">
     </audio>
 
     <script>
-        const slime = document.getElementById('slime');
+        const cat = document.getElementById('cat');
         const container = document.getElementById('container');
         const music = document.getElementById('party-music');
         const uiText = document.getElementById('ui');
         let isPartyMode = false;
 
-        const modes = ['bounce', 'wiggle-mode', 'spin-mode'];
-        const colors = [
-            'linear-gradient(135deg, #00ffcc, #0099ff)',
-            'linear-gradient(135deg, #ff00ff, #ffcc00)',
-            'linear-gradient(135deg, #ff3300, #ff0066)',
-            'linear-gradient(135deg, #00ff00, #00ffff)'
-        ];
+        const colors = ['#00ffcc', '#ff00ff', '#ff3300', '#ffff00'];
 
-        // 1. Click to Start Party
+        // 1. Click to Start
         document.body.addEventListener('click', () => {
             if (!isPartyMode) {
                 music.play();
                 isPartyMode = true;
                 container.classList.add('dancing');
-                uiText.innerText = "PARTY TIME!";
-                startDiscoLoop();
+                uiText.innerText = "HOOKAH BAR!";
+                startHookahSync();
             }
         });
 
-        // 2. Change Dance & Color every 3 seconds
-        function startDiscoLoop() {
+        // 2. Sync Dance & Color to Music
+        function startHookahSync() {
+            // Change colors rapidly with the beat (every 0.4 seconds)
             setInterval(() => {
                 if(!isPartyMode) return;
-                const randomMode = modes[Math.floor(Math.random() * modes.length)];
                 const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                
-                slime.classList.remove('wiggle-mode', 'spin-mode');
-                if(randomMode !== 'bounce') {
-                    slime.classList.add(randomMode);
+                cat.style.color = randomColor;
+                cat.style.textShadow = `0 0 15px ${randomColor}`;
+            }, 400);
+
+            // Change dance move every 8 seconds
+            setInterval(() => {
+                if(!isPartyMode) return;
+                cat.classList.remove('fast-rave', 'spin-mode');
+                const rand = Math.random();
+                if (rand < 0.4) {
+                    cat.classList.add('fast-rave');
+                } else if (rand < 0.7) {
+                    cat.classList.add('spin-mode');
                 }
-                
-                slime.style.background = randomColor;
-                slime.style.boxShadow = `0 0 50px ${randomColor.split(',')[1].trim()}`;
-            }, 3000);
+            }, 8000);
         }
 
         // 3. Follow Mouse
@@ -175,7 +158,7 @@
             container.style.transform = `translateX(${-x}px) translateY(${-y}px)`;
         });
 
-        // 4. Create background particles
+        // 4. Create particles
         function createParticle() {
             if(!isPartyMode) return;
             const p = document.createElement('div');
@@ -184,9 +167,9 @@
             p.style.top = window.innerHeight + 'px';
             p.style.background = colors[Math.floor(Math.random() * colors.length)];
             document.body.appendChild(p);
-            setTimeout(() => p.remove(), 2000);
+            setTimeout(() => p.remove(), 1500);
         }
-        setInterval(createParticle, 150);
+        setInterval(createParticle, 100);
     </script>
 </body>
 </html>
