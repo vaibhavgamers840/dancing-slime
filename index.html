@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hookah Bar Cat</title>
+    <title>Hookah Bar Dancing Cat</title>
     <style>
         body {
             margin: 0;
@@ -13,7 +13,7 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Segoe UI', sans-serif;
             color: white;
             cursor: pointer;
         }
@@ -25,38 +25,45 @@
             z-index: 10;
         }
 
-        .cat {
-            font-size: 20px;
-            white-space: pre;
-            line-height: 1.2;
-            text-shadow: 0 0 10px #ff00ff;
-            /* Transition for color changes */
-            transition: color 0.3s, text-shadow 0.3s;
-            color: #00ffcc;
+        /* SVG Styles for Body Movement */
+        #cat-svg {
+            width: 200px;
+            height: 200px;
+            filter: drop-shadow(0 0 15px #00ffcc);
+            transition: filter 0.3s;
+        }
+
+        #cat-body {
+            fill: url(#slimeGradient);
+            transition: fill 0.3s;
+        }
+
+        #cat-face {
+            fill: #111;
         }
 
         /* --- DANCE ANIMATIONS SYNCED TO HOOKAH BAR --- */
         
         /* 1. Slow Sway (Idle/Verses) */
-        .dancing .cat {
+        .dancing #cat-svg {
             animation: sway 1.2s infinite alternate ease-in-out;
         }
         @keyframes sway {
-            0% { transform: rotate(-5deg) translateY(0); }
-            100% { transform: rotate(5deg) translateY(-20px); }
+            0% { transform: rotate(-5deg) translateY(0) scale(1); }
+            100% { transform: rotate(5deg) translateY(-20px) scale(1.05); }
         }
 
-        /* 2. Fast Rave (Chorus) */
-        .fast-rave {
-            animation: rave 0.4s infinite alternate ease-in-out !important;
+        /* 2. Fast Rave (Chorus) - Body Squish */
+        .fast-rave #cat-svg {
+            animation: raveBody 0.4s infinite alternate ease-in-out !important;
         }
-        @keyframes rave {
-            0% { transform: scale(1.1) rotate(-15deg); }
-            100% { transform: scale(0.9) rotate(15deg) translateY(-30px); }
+        @keyframes raveBody {
+            0% { transform: scale(1.2, 0.8) translateY(10px); }
+            100% { transform: scale(0.8, 1.2) translateY(-40px); }
         }
 
         /* 3. Spin (Bridge) */
-        .spin-mode {
+        .spin-mode #cat-svg {
             animation: spin 0.8s infinite linear !important;
         }
         @keyframes spin {
@@ -94,11 +101,20 @@
 <body>
 
     <div class="pet-container" id="container">
-        <div class="cat" id="cat">
- /\_/\
-( o.o )
- > ^ <
-        </div>
+        <svg id="cat-svg" viewBox="0 0 100 100">
+            <defs>
+                <linearGradient id="slimeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#00ffcc;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#0099ff;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <path id="cat-body" d="M50 15 C 30 15, 20 30, 20 50 C 20 70, 30 85, 50 85 C 70 85, 80 70, 80 50 C 80 30, 70 15, 50 15 Z" />
+            <path id="cat-body" d="M30 25 L 20 5 L 40 20 Z" />
+            <path id="cat-body" d="M70 25 L 80 5 L 60 20 Z" />
+            <circle id="cat-face" cx="40" cy="45" r="5" />
+            <circle id="cat-face" cx="60" cy="45" r="5" />
+            <path id="cat-face" d="M45 60 Q 50 65, 55 60" fill="none" stroke="#111" stroke-width="2" />
+        </svg>
     </div>
 
     <div id="ui">CLICK TO DANCE</div>
@@ -108,13 +124,19 @@
     </audio>
 
     <script>
-        const cat = document.getElementById('cat');
+        const catSvg = document.getElementById('cat-svg');
+        const catBody = document.getElementById('cat-body');
         const container = document.getElementById('container');
         const music = document.getElementById('party-music');
         const uiText = document.getElementById('ui');
         let isPartyMode = false;
 
-        const colors = ['#00ffcc', '#ff00ff', '#ff3300', '#ffff00'];
+        const colors = [
+            ['#00ffcc', '#0099ff'], // Cyan/Blue
+            ['#ff00ff', '#ffcc00'], // Magenta/Yellow
+            ['#ff3300', '#ff0066'], // Red/Pink
+            ['#00ff00', '#00ffff']  // Green/Cyan
+        ];
 
         // 1. Click to Start
         document.body.addEventListener('click', () => {
@@ -132,20 +154,23 @@
             // Change colors rapidly with the beat (every 0.4 seconds)
             setInterval(() => {
                 if(!isPartyMode) return;
-                const randomColor = colors[Math.floor(Math.random() * colors.length)];
-                cat.style.color = randomColor;
-                cat.style.textShadow = `0 0 15px ${randomColor}`;
+                const randomColors = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Update SVG Gradient
+                document.querySelector('#slimeGradient stop:nth-child(1)').style.stopColor = randomColors[0];
+                document.querySelector('#slimeGradient stop:nth-child(2)').style.stopColor = randomColors[1];
+                catSvg.style.filter = `drop-shadow(0 0 15px ${randomColors[0]})`;
             }, 400);
 
             // Change dance move every 8 seconds
             setInterval(() => {
                 if(!isPartyMode) return;
-                cat.classList.remove('fast-rave', 'spin-mode');
+                container.classList.remove('fast-rave', 'spin-mode');
                 const rand = Math.random();
                 if (rand < 0.4) {
-                    cat.classList.add('fast-rave');
+                    container.classList.add('fast-rave');
                 } else if (rand < 0.7) {
-                    cat.classList.add('spin-mode');
+                    container.classList.add('spin-mode');
                 }
             }, 8000);
         }
@@ -165,7 +190,7 @@
             p.className = 'particle';
             p.style.left = Math.random() * window.innerWidth + 'px';
             p.style.top = window.innerHeight + 'px';
-            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            p.style.background = colors[Math.floor(Math.random() * colors.length)][0];
             document.body.appendChild(p);
             setTimeout(() => p.remove(), 1500);
         }
