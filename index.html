@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shockwave Disco Cat</title>
+    <title>Mitthu's Disco Cat</title>
     <style>
         body {
             margin: 0;
@@ -13,73 +13,59 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            transition: background 0.05s;
+            font-family: 'Arial Black', Gadget, sans-serif;
         }
 
+        /* --- THE MITTHU START SCREEN --- */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
+            background: radial-gradient(circle, #1a1a1a, #000);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
-        }
-
-        #start-btn {
-            padding: 25px 60px;
-            font-size: 28px;
-            background: #ff00ff;
-            color: white;
-            border: none;
-            border-radius: 50px;
             cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 0 50px #ff00ff;
         }
 
-        /* --- SCREEN SHAKE EFFECT --- */
-        .shake {
-            animation: shakeScreen 0.1s ease-in-out;
+        .name-display {
+            font-size: 80px;
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 10px;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #00ffff;
+            animation: neonPulse 1s infinite alternate;
         }
 
-        @keyframes shakeScreen {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(3px, 3px); }
-            50% { transform: translate(-3px, -3px); }
-            75% { transform: translate(3px, -3px); }
-            100% { transform: translate(0,0); }
+        @keyframes neonPulse {
+            from { transform: scale(1); text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; }
+            to { transform: scale(1.1); text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff; }
         }
 
-        /* --- THE DISCO LIGHTS --- */
-        .light {
-            position: absolute;
-            width: 90vw;
-            height: 90vh;
-            border-radius: 50%;
-            filter: blur(150px);
-            opacity: 0.6;
-            z-index: 1;
+        .click-hint {
+            color: #555;
+            margin-top: 20px;
+            letter-spacing: 2px;
+            font-size: 14px;
+        }
+
+        /* --- THE DANCING CAT --- */
+        #cat-wrapper {
             display: none;
-        }
-        #light-left { top: -20%; left: -20%; }
-        #light-right { bottom: -20%; right: -20%; }
-
-        /* --- THE CAT --- */
-        #cat-container {
-            display: none;
-            width: 250px;
-            height: 250px;
+            position: relative; /* Container for the cat AND waves */
+            width: 300px;
+            height: 300px;
             z-index: 10;
-            position: relative; /* Essential for correct wave positioning */
         }
 
         .dancing {
+            /* 140 BPM Sync */
             animation: beat-bounce 0.428s infinite alternate cubic-bezier(0.6, 0, 0.4, 1);
         }
 
         @keyframes beat-bounce {
-            0% { transform: scale(1.4, 0.6) translateY(20px); }
+            0% { transform: scale(1.4, 0.6) translateY(50px); }
             100% { transform: scale(0.6, 1.4) translateY(-100px); }
         }
 
@@ -89,38 +75,46 @@
             filter: drop-shadow(0 0 30px #00ffcc);
         }
 
-        /* --- SOUND WAVES --- */
+        /* --- THE FIXED WAVE EFFECT --- */
         .wave {
             position: absolute;
-            border: 4px solid #fff;
+            top: 50%;
+            left: 50%;
+            border: 6px solid #fff;
             border-radius: 50%;
             pointer-events: none;
-            z-index: 5;
-            animation: wave-expand 0.5s ease-out forwards;
-            /* Center the wave on its own position */
             transform: translate(-50%, -50%);
+            animation: wave-expand 0.5s ease-out forwards;
         }
 
         @keyframes wave-expand {
-            0% { width: 50px; height: 50px; opacity: 1; border-width: 8px; }
-            100% { width: 600px; height: 600px; opacity: 0; border-width: 1px; }
+            0% { width: 50px; height: 50px; opacity: 1; border-width: 10px; }
+            100% { width: 800px; height: 800px; opacity: 0; border-width: 1px; }
+        }
+
+        /* --- SCREEN SHAKE --- */
+        .shake {
+            animation: heavyShake 0.1s infinite;
+        }
+        @keyframes heavyShake {
+            0% { transform: translate(2px, 2px); }
+            50% { transform: translate(-2px, -2px); }
+            100% { transform: translate(2px, -2px); }
         }
     </style>
 </head>
 <body id="main-body">
 
-    <div id="overlay">
-        <button id="start-btn" onclick="startParty()">ACTIVATE BASS</button>
+    <div id="overlay" onclick="startParty()">
+        <div class="name-display">MITTHU</div>
+        <div class="click-hint">CLICK TO START THE SHOW</div>
     </div>
 
-    <div id="light-left" class="light"></div>
-    <div id="light-right" class="light"></div>
-
-    <div id="cat-container">
+    <div id="cat-wrapper">
         <svg id="cat-svg" viewBox="0 0 100 100">
-            <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffcc" />
-            <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffcc" class="cat-part" />
-            <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffcc" class="cat-part" />
+            <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffff" />
+            <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffff" class="cat-part" />
+            <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffff" class="cat-part" />
             <circle cx="40" cy="50" r="4" fill="#111" />
             <circle cx="60" cy="50" r="4" fill="#111" />
             <path d="M45 65 Q 50 70, 55 65" fill="none" stroke="#111" stroke-width="2" />
@@ -134,65 +128,47 @@
     <script>
         const music = document.getElementById('music');
         const overlay = document.getElementById('overlay');
-        const container = document.getElementById('cat-container');
+        const wrapper = document.getElementById('cat-wrapper');
         const bodyTag = document.getElementById('main-body');
-        const lLeft = document.getElementById('light-left');
-        const lRight = document.getElementById('light-right');
-        const bodyParts = [document.getElementById('cat-body'), ...document.querySelectorAll('.cat-part')];
+        const bodyPath = document.getElementById('cat-body');
+        const extraParts = document.querySelectorAll('.cat-part');
 
         function startParty() {
             overlay.style.display = 'none';
-            container.style.display = 'block';
-            lLeft.style.display = 'block';
-            lRight.style.display = 'block';
+            wrapper.style.display = 'block';
             
             music.play().then(() => {
-                container.classList.add('dancing');
-                syncEffects();
+                wrapper.classList.add('dancing');
+                // Start the beat-synced loop
+                setInterval(syncToBeat, 428); 
             });
         }
 
-        function syncEffects() {
-            const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff3300', '#00ff00', '#ffffff'];
-            
-            setInterval(() => {
-                const c1 = colors[Math.floor(Math.random() * colors.length)];
-                
-                // Color Change
-                bodyParts.forEach(part => part.setAttribute('fill', c1));
-                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 30px ${c1})`;
-                
-                // Light Flash
-                lLeft.style.background = c1;
-                lRight.style.background = colors[Math.floor(Math.random() * colors.length)];
+        function syncToBeat() {
+            const colors = ['#00ffff', '#ff00ff', '#ffff00', '#ff3300', '#00ff00', '#ffffff'];
+            const randColor = colors[Math.floor(Math.random() * colors.length)];
 
-                // Screen Shake
-                bodyTag.classList.add('shake');
-                setTimeout(() => bodyTag.classList.remove('shake'), 100);
+            // 1. Change Cat Color
+            bodyPath.setAttribute('fill', randColor);
+            extraParts.forEach(p => p.setAttribute('fill', randColor));
+            document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 40px ${randColor})`;
 
-                // --- ADD SHOCKWAVE FROM CAT ---
-                createWave(c1);
+            // 2. Shake the screen
+            bodyTag.classList.add('shake');
+            setTimeout(() => bodyTag.classList.remove('shake'), 100);
 
-            }, 428); // 140 BPM
-        }
+            // 3. Background Flash
+            bodyTag.style.backgroundColor = `${randColor}22`;
+            setTimeout(() => bodyTag.style.backgroundColor = '#000', 100);
 
-        function createWave(color) {
+            // 4. SPAWN WAVE (Inside the wrapper so it moves WITH the cat)
             const wave = document.createElement('div');
             wave.className = 'wave';
+            wave.style.borderColor = randColor;
+            wave.style.boxShadow = `0 0 20px ${randColor}`;
+            wrapper.appendChild(wave);
             
-            // Get current exact position of the jumping cat
-            const rect = container.getBoundingClientRect();
-            
-            // Set the wave to start at the center of the cat's container
-            wave.style.left = rect.left + (rect.width / 2) + 'px';
-            wave.style.top = rect.top + (rect.height / 2) + 'px';
-            
-            wave.style.borderColor = color;
-            wave.style.boxShadow = `0 0 15px ${color}`;
-            
-            document.body.appendChild(wave);
-            
-            // Remove wave after animation
+            // Cleanup wave
             setTimeout(() => wave.remove(), 500);
         }
     </script>
