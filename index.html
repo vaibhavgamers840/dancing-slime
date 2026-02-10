@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bass Boosted Disco</title>
+    <title>Extreme Shake Disco</title>
     <style>
         body {
             margin: 0;
@@ -13,7 +13,8 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            transition: background 0.05s;
+            /* Smooth zoom effect for the whole screen */
+            transition: transform 0.1s ease-out, background-color 0.05s;
         }
 
         #overlay {
@@ -29,49 +30,34 @@
         #start-btn {
             padding: 25px 60px;
             font-size: 28px;
-            background: #00ffcc;
-            color: #000;
+            background: #ff00ff;
+            color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             font-weight: bold;
-            box-shadow: 0 0 50px #00ffcc;
+            box-shadow: 0 0 50px #ff00ff;
         }
 
-        /* --- SCREEN SHAKE EFFECT --- */
-        .shake {
-            animation: shakeScreen 0.1s ease-in-out;
+        /* --- EXTREME SHAKE & GLITCH --- */
+        .extreme-shake {
+            animation: heavyShake 0.15s cubic-bezier(.36,.07,.19,.97) both;
+            transform: scale(1.05); /* Slight zoom on impact */
         }
 
-        @keyframes shakeScreen {
-            0% { transform: translate(0,0); }
-            25% { transform: translate(5px, 5px); }
-            50% { transform: translate(-5px, -5px); }
-            75% { transform: translate(5px, -5px); }
-            100% { transform: translate(0,0); }
+        @keyframes heavyShake {
+            10%, 90% { transform: translate3d(-4px, 0, 0) scale(1.05); }
+            20%, 80% { transform: translate3d(8px, 0, 0) scale(1.05); }
+            30%, 50%, 70% { transform: translate3d(-12px, -5px, 0) scale(1.05); }
+            40%, 60% { transform: translate3d(12px, 5px, 0) scale(1.05); }
         }
-
-        /* --- THE DISCO LIGHTS --- */
-        .light {
-            position: absolute;
-            width: 90vw;
-            height: 90vh;
-            border-radius: 50%;
-            filter: blur(150px);
-            opacity: 0.7;
-            z-index: 1;
-            display: none;
-        }
-        #light-left { top: -20%; left: -20%; }
-        #light-right { bottom: -20%; right: -20%; }
 
         /* --- THE CAT --- */
         #cat-container {
             display: none;
-            width: 320px;
-            height: 320px;
+            width: 250px;
+            height: 250px;
             z-index: 10;
-            transition: filter 0.1s;
         }
 
         .dancing {
@@ -79,8 +65,8 @@
         }
 
         @keyframes beat-bounce {
-            0% { transform: scale(1.4, 0.6) translateY(50px); filter: blur(2px); }
-            100% { transform: scale(0.6, 1.4) translateY(-100px); filter: blur(0px); }
+            0% { transform: scale(1.5, 0.5) translateY(40px); }
+            100% { transform: scale(0.6, 1.4) translateY(-120px); }
         }
 
         #cat-svg {
@@ -88,16 +74,28 @@
             height: 100%;
             filter: drop-shadow(0 0 30px #00ffcc);
         }
+
+        /* --- SHOCKWAVES --- */
+        .wave {
+            position: absolute;
+            border: 4px solid #fff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+            animation: wave-expand 0.4s ease-out forwards;
+        }
+
+        @keyframes wave-expand {
+            0% { width: 100px; height: 100px; opacity: 1; transform: scale(0.5); }
+            100% { width: 600px; height: 600px; opacity: 0; transform: scale(1.5); }
+        }
     </style>
 </head>
 <body id="main-body">
 
     <div id="overlay">
-        <button id="start-btn" onclick="startParty()">FEEL THE BEAT</button>
+        <button id="start-btn" onclick="startParty()">ACTIVATE BASS</button>
     </div>
-
-    <div id="light-left" class="light"></div>
-    <div id="light-right" class="light"></div>
 
     <div id="cat-container">
         <svg id="cat-svg" viewBox="0 0 100 100">
@@ -119,44 +117,55 @@
         const overlay = document.getElementById('overlay');
         const container = document.getElementById('cat-container');
         const bodyTag = document.getElementById('main-body');
-        const lLeft = document.getElementById('light-left');
-        const lRight = document.getElementById('light-right');
         const bodyParts = [document.getElementById('cat-body'), ...document.querySelectorAll('.cat-part')];
 
         function startParty() {
             overlay.style.display = 'none';
             container.style.display = 'block';
-            lLeft.style.display = 'block';
-            lRight.style.display = 'block';
             
             music.play().then(() => {
                 container.classList.add('dancing');
-                syncEffects();
+                syncHeavyEffects();
             });
         }
 
-        function syncEffects() {
+        function syncHeavyEffects() {
             const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff3300', '#00ff00', '#ffffff'];
             
             setInterval(() => {
                 const c1 = colors[Math.floor(Math.random() * colors.length)];
                 
-                // Color Change
+                // 1. Color Change
                 bodyParts.forEach(part => part.setAttribute('fill', c1));
+                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 50px ${c1})`;
                 
-                // Light Flash
-                lLeft.style.background = c1;
-                lRight.style.background = colors[Math.floor(Math.random() * colors.length)];
+                // 2. EXTREME SHAKE (Triggers exactly when cat "hits" the beat)
+                bodyTag.classList.add('extreme-shake');
+                setTimeout(() => bodyTag.classList.remove('extreme-shake'), 150);
 
-                // THE MISSING PIECE: Screen Shake on every beat
-                bodyTag.classList.add('shake');
-                setTimeout(() => bodyTag.classList.remove('shake'), 100);
+                // 3. Background Flash
+                bodyTag.style.backgroundColor = `${c1}44`;
+                setTimeout(() => bodyTag.style.backgroundColor = '#000', 80);
 
-                // Background Pulse
-                bodyTag.style.backgroundColor = `${c1}33`;
-                setTimeout(() => bodyTag.style.backgroundColor = '#000', 150);
+                // 4. Create Wave
+                createWave(c1);
 
             }, 428); // 140 BPM
+        }
+
+        function createWave(color) {
+            const rect = container.getBoundingClientRect();
+            const wave = document.createElement('div');
+            wave.className = 'wave';
+            
+            wave.style.left = (window.innerWidth / 2) - 50 + 'px';
+            wave.style.top = (window.innerHeight / 2) - 50 + 'px';
+            
+            wave.style.borderColor = color;
+            wave.style.boxShadow = `0 0 30px ${color}`;
+            
+            document.body.appendChild(wave);
+            setTimeout(() => wave.remove(), 400);
         }
     </script>
 </body>
