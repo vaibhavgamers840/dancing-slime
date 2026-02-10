@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinite Party Slime</title>
+    <style>
+        body {
+            margin: 0;
+            background: #050505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* --- THE DANCING SLIME --- */
+        .pet-container {
+            position: relative;
+            transition: all 0.1s ease-out;
+            z-index: 10;
+        }
+
+        .slime {
+            width: 150px;
+            height: 120px;
+            background: linear-gradient(135deg, #555, #333);
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            /* Static until clicked */
+            transition: background 1s, filter 0.5s, box-shadow 1s;
+        }
+
+        /* --- FACE --- */
+        .eye {
+            width: 18px;
+            height: 18px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 40px;
+            transition: all 0.2s;
+        }
+        .eye.left { left: 40px; }
+        .eye.right { right: 40px; }
+        .pupil {
+            width: 8px;
+            height: 8px;
+            background: #111;
+            border-radius: 50%;
+            position: absolute;
+            top: 4px;
+            left: 5px;
+        }
+
+        /* --- DANCE ANIMATIONS --- */
+        .dancing .slime {
+            animation: bounce 0.6s infinite alternate ease-in-out;
+        }
+
+        @keyframes bounce {
+            from { transform: scaleX(1) translateY(0); }
+            to { transform: scaleX(1.1) translateY(-30px); }
+        }
+
+        .wiggle-mode {
+            animation: wiggle 0.4s infinite alternate ease-in-out !important;
+        }
+        @keyframes wiggle {
+            from { transform: rotate(-15deg); }
+            to { transform: rotate(15deg) scale(1.1); }
+        }
+
+        .spin-mode {
+            animation: spin 1s infinite linear !important;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- BACKGROUND PARTICLES --- */
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: fly 2s infinite linear;
+        }
+        @keyframes fly {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-200px) scale(0); opacity: 0; }
+        }
+
+        #ui {
+            position: absolute;
+            bottom: 30px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-size: 14px;
+            text-align: center;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="pet-container" id="container">
+        <div class="slime" id="slime">
+            <div class="eye left"><div class="pupil"></div></div>
+            <div class="eye right"><div class="pupil"></div></div>
+        </div>
+    </div>
+
+    <div id="ui">CLICK SLIME TO PARTY!</div>
+
+    <audio id="party-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        const slime = document.getElementById('slime');
+        const container = document.getElementById('container');
+        const music = document.getElementById('party-music');
+        const uiText = document.getElementById('ui');
+        let isPartyMode = false;
+
+        const modes = ['bounce', 'wiggle-mode', 'spin-mode'];
+        const colors = [
+            'linear-gradient(135deg, #00ffcc, #0099ff)',
+            'linear-gradient(135deg, #ff00ff, #ffcc00)',
+            'linear-gradient(135deg, #ff3300, #ff0066)',
+            'linear-gradient(135deg, #00ff00, #00ffff)'
+        ];
+
+        // 1. Click to Start Party
+        document.body.addEventListener('click', () => {
+            if (!isPartyMode) {
+                music.play();
+                isPartyMode = true;
+                container.classList.add('dancing');
+                uiText.innerText = "PARTY TIME!";
+                startDiscoLoop();
+            }
+        });
+
+        // 2. Change Dance & Color every 3 seconds
+        function startDiscoLoop() {
+            setInterval(() => {
+                if(!isPartyMode) return;
+                const randomMode = modes[Math.floor(Math.random() * modes.length)];
+                const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                slime.classList.remove('wiggle-mode', 'spin-mode');
+                if(randomMode !== 'bounce') {
+                    slime.classList.add(randomMode);
+                }
+                
+                slime.style.background = randomColor;
+                slime.style.boxShadow = `0 0 50px ${randomColor.split(',')[1].trim()}`;
+            }, 3000);
+        }
+
+        // 3. Follow Mouse
+        document.addEventListener('mousemove', (e) => {
+            if(!isPartyMode) return;
+            const x = (window.innerWidth / 2 - e.pageX) / 30;
+            const y = (window.innerHeight / 2 - e.pageY) / 30;
+            container.style.transform = `translateX(${-x}px) translateY(${-y}px)`;
+        });
+
+        // 4. Create background particles
+        function createParticle() {
+            if(!isPartyMode) return;
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = Math.random() * window.innerWidth + 'px';
+            p.style.top = window.innerHeight + 'px';
+            p.style.background = colors[Math.floor(Math.random() * colors.length)];
+            document.body.appendChild(p);
+            setTimeout(() => p.remove(), 2000);
+        }
+        setInterval(createParticle, 150);
+    </script>
+</body>
+</html>
