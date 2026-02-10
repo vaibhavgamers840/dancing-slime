@@ -3,50 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hookah Bar Dancing Cat</title>
+    <title>Dancing Cat Party</title>
     <style>
         body {
             margin: 0;
             background: #000;
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: white;
-            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            font-family: sans-serif;
         }
 
-        /* --- START OVERLAY --- */
+        /* --- START OVERLAY (Required by Browsers) --- */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: radial-gradient(circle, #222, #000);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
-        button {
-            padding: 20px 50px;
-            font-size: 24px;
+        #start-btn {
+            padding: 25px 60px;
+            font-size: 28px;
             background: #ff00ff;
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 0 30px #ff00ff;
             font-weight: bold;
+            box-shadow: 0 0 40px #ff00ff;
+            transition: transform 0.2s;
         }
+        #start-btn:hover { transform: scale(1.1); }
 
         /* --- THE CAT --- */
-        .cat-box {
+        #cat-container {
+            display: none;
             position: relative;
-            width: 250px;
-            height: 250px;
-            display: none; /* Hidden until start */
+            width: 300px;
+            height: 300px;
         }
 
         #cat-svg {
@@ -55,90 +55,96 @@
             filter: drop-shadow(0 0 20px #00ffcc);
         }
 
-        /* Dance Animation */
-        .dance-active {
-            animation: bounce 0.45s infinite alternate ease-in-out;
+        /* The Dance Move */
+        .dancing {
+            animation: cat-bounce 0.46s infinite alternate ease-in-out;
         }
 
-        @keyframes bounce {
-            0% { transform: scale(1.1, 0.8) translateY(20px); }
-            100% { transform: scale(0.9, 1.2) translateY(-40px); }
+        @keyframes cat-bounce {
+            0% { transform: scale(1.1, 0.85) translateY(20px); }
+            100% { transform: scale(0.9, 1.15) translateY(-50px) rotate(5deg); }
         }
 
-        #volume-control {
-            margin-top: 20px;
-            display: none;
+        /* Background Visualizer Particles */
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 2s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-500px); opacity: 0; }
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button onclick="playMusic()">START PARTY</button>
+        <button id="start-btn" onclick="startParty()">START PARTY</button>
     </div>
 
-    <div class="cat-box" id="cat-box">
+    <div id="cat-container">
         <svg id="cat-svg" viewBox="0 0 100 100">
             <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffcc" />
-            <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffcc" />
-            <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffcc" />
+            <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffcc" id="ear1" />
+            <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffcc" id="ear2" />
             <circle cx="40" cy="50" r="4" fill="#111" />
             <circle cx="60" cy="50" r="4" fill="#111" />
             <path d="M45 65 Q 50 70, 55 65" fill="none" stroke="#111" stroke-width="2" />
         </svg>
     </div>
 
-    <div id="volume-control">
-        <label>Volume: </label>
-        <input type="range" id="vol-slider" min="0" max="1" step="0.1" value="0.8">
-    </div>
-
-    <audio id="track" loop>
-        <source src="http://googleusercontent.com/file_content/18" type="audio/mpeg">
+    <audio id="music" loop>
+        <source src="Hookah Bar-(SambalpuriStar.In).mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        const track = document.getElementById('track');
-        const catBox = document.getElementById('cat-box');
+        const music = document.getElementById('music');
         const overlay = document.getElementById('overlay');
-        const slider = document.getElementById('vol-slider');
+        const container = document.getElementById('cat-container');
+        const body = document.getElementById('cat-body');
+        const ear1 = document.getElementById('ear1');
+        const ear2 = document.getElementById('ear2');
 
-        function playMusic() {
-            // Hide Overlay
+        function startParty() {
+            // Hide button
             overlay.style.display = 'none';
-            catBox.style.display = 'block';
-            document.getElementById('volume-control').style.display = 'block';
-
-            // Set Volume
-            track.volume = 0.8;
+            container.style.display = 'block';
             
-            // Try to Play
-            const playPromise = track.play();
-
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    // Music started! Start the dance
-                    catBox.classList.add('dance-active');
-                    startColorFlash();
-                }).catch(error => {
-                    console.log("Playback failed:", error);
-                    alert("Browser blocked audio. Please click the screen again!");
-                });
-            }
+            // Play Music
+            music.play().then(() => {
+                container.classList.add('dancing');
+                initVisuals();
+            }).catch(e => {
+                alert("Error: Please make sure the MP3 file is in the same folder and named correctly!");
+            });
         }
 
-        slider.addEventListener('input', (e) => {
-            track.volume = e.target.value;
-        });
-
-        function startColorFlash() {
-            const colors = ['#00ffcc', '#ff00ff', '#ffff00', '#ff3300'];
-            const body = document.getElementById('cat-body');
+        function initVisuals() {
+            const colors = ['#00ffcc', '#ff00ff', '#ffff00', '#0099ff', '#ff3300'];
+            
+            // Sync Colors to Beat
             setInterval(() => {
                 const color = colors[Math.floor(Math.random() * colors.length)];
                 body.setAttribute('fill', color);
+                ear1.setAttribute('fill', color);
+                ear2.setAttribute('fill', color);
                 document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 30px ${color})`;
-            }, 450);
+            }, 460); // Roughly matches the BPM
+
+            // Particles
+            setInterval(() => {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.style.left = Math.random() * window.innerWidth + 'px';
+                p.style.top = window.innerHeight + 'px';
+                p.style.background = colors[Math.floor(Math.random() * colors.length)];
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 2000);
+            }, 100);
         }
     </script>
 </body>
