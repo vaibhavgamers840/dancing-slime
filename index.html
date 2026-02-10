@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dancing Cat Party</title>
+    <title>Full Disco Beat Sync</title>
     <style>
         body {
             margin: 0;
@@ -13,14 +13,13 @@
             align-items: center;
             height: 100vh;
             overflow: hidden;
-            font-family: sans-serif;
+            transition: background 0.1s;
         }
 
-        /* --- START OVERLAY (Required by Browsers) --- */
         #overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, #222, #000);
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -37,60 +36,71 @@
             cursor: pointer;
             font-weight: bold;
             box-shadow: 0 0 40px #ff00ff;
-            transition: transform 0.2s;
         }
-        #start-btn:hover { transform: scale(1.1); }
+
+        /* --- THE DISCO LIGHTS --- */
+        .light {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            z-index: 1;
+            display: none;
+        }
+        #light-1 { top: -200px; left: -200px; background: #ff00ff; }
+        #light-2 { bottom: -200px; right: -200px; background: #00ffff; }
 
         /* --- THE CAT --- */
         #cat-container {
             display: none;
-            position: relative;
-            width: 300px;
-            height: 300px;
+            width: 350px;
+            height: 350px;
+            z-index: 10;
+        }
+
+        .dancing {
+            /* Sync: 140 BPM = 0.428s */
+            animation: beat-bounce 0.428s infinite alternate cubic-bezier(0.6, 0, 0.4, 1);
+        }
+
+        @keyframes beat-bounce {
+            0% { transform: scale(1.2, 0.8) translateY(30px); }
+            100% { transform: scale(0.8, 1.2) translateY(-70px); }
         }
 
         #cat-svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 20px #00ffcc);
+            filter: drop-shadow(0 0 20px #ff00ff);
         }
 
-        /* The Dance Move */
-        .dancing {
-            animation: cat-bounce 0.46s infinite alternate ease-in-out;
+        /* Flash Effect on Body */
+        .flash {
+            animation: color-flash 0.428s infinite alternate;
         }
 
-        @keyframes cat-bounce {
-            0% { transform: scale(1.1, 0.85) translateY(20px); }
-            100% { transform: scale(0.9, 1.15) translateY(-50px) rotate(5deg); }
-        }
-
-        /* Background Visualizer Particles */
-        .particle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            pointer-events: none;
-            animation: float 2s infinite linear;
-        }
-        @keyframes float {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-500px); opacity: 0; }
+        @keyframes color-flash {
+            0% { filter: brightness(1) drop-shadow(0 0 20px currentColor); }
+            100% { filter: brightness(1.8) drop-shadow(0 0 50px currentColor); }
         }
     </style>
 </head>
 <body>
 
     <div id="overlay">
-        <button id="start-btn" onclick="startParty()">START PARTY</button>
+        <button id="start-btn" onclick="startParty()">ENTER THE CLUB</button>
     </div>
+
+    <div id="light-1" class="light"></div>
+    <div id="light-2" class="light"></div>
 
     <div id="cat-container">
         <svg id="cat-svg" viewBox="0 0 100 100">
-            <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffcc" />
-            <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffcc" id="ear1" />
-            <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffcc" id="ear2" />
+            <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#ff00ff" />
+            <path d="M30 30 L 15 5 L 45 25 Z" fill="#ff00ff" class="cat-part" />
+            <path d="M70 30 L 85 5 L 55 25 Z" fill="#ff00ff" class="cat-part" />
             <circle cx="40" cy="50" r="4" fill="#111" />
             <circle cx="60" cy="50" r="4" fill="#111" />
             <path d="M45 65 Q 50 70, 55 65" fill="none" stroke="#111" stroke-width="2" />
@@ -105,46 +115,41 @@
         const music = document.getElementById('music');
         const overlay = document.getElementById('overlay');
         const container = document.getElementById('cat-container');
-        const body = document.getElementById('cat-body');
-        const ear1 = document.getElementById('ear1');
-        const ear2 = document.getElementById('ear2');
+        const l1 = document.getElementById('light-1');
+        const l2 = document.getElementById('light-2');
+        const bodyParts = [document.getElementById('cat-body'), ...document.querySelectorAll('.cat-part')];
 
         function startParty() {
-            // Hide button
             overlay.style.display = 'none';
             container.style.display = 'block';
+            l1.style.display = 'block';
+            l2.style.display = 'block';
             
-            // Play Music
             music.play().then(() => {
                 container.classList.add('dancing');
-                initVisuals();
-            }).catch(e => {
-                alert("Error: Please make sure the MP3 file is in the same folder and named correctly!");
+                syncEverything();
             });
         }
 
-        function initVisuals() {
-            const colors = ['#00ffcc', '#ff00ff', '#ffff00', '#0099ff', '#ff3300'];
+        function syncEverything() {
+            const colors = ['#ff00ff', '#00ffff', '#ffff00', '#ff3300', '#00ff00', '#ffffff'];
             
-            // Sync Colors to Beat
             setInterval(() => {
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                body.setAttribute('fill', color);
-                ear1.setAttribute('fill', color);
-                ear2.setAttribute('fill', color);
-                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 30px ${color})`;
-            }, 460); // Roughly matches the BPM
+                const c1 = colors[Math.floor(Math.random() * colors.length)];
+                const c2 = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Update Cat Color
+                bodyParts.forEach(part => part.setAttribute('fill', c1));
+                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 40px ${c1})`;
 
-            // Particles
-            setInterval(() => {
-                const p = document.createElement('div');
-                p.className = 'particle';
-                p.style.left = Math.random() * window.innerWidth + 'px';
-                p.style.top = window.innerHeight + 'px';
-                p.style.background = colors[Math.floor(Math.random() * colors.length)];
-                document.body.appendChild(p);
-                setTimeout(() => p.remove(), 2000);
-            }, 100);
+                // Update Background Disco Lights
+                l1.style.background = c1;
+                l2.style.background = c2;
+
+                // Subtle Background Flash
+                document.body.style.background = `radial-gradient(circle, ${c1}11 0%, #000 80%)`;
+
+            }, 428); // 140 BPM Sync
         }
     </script>
 </body>
