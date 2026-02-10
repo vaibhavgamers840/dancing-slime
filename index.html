@@ -7,85 +7,79 @@
     <style>
         body {
             margin: 0;
-            background: #050505;
+            background: #000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            overflow: hidden;
-            font-family: 'Segoe UI', sans-serif;
             color: white;
+            font-family: 'Arial', sans-serif;
         }
 
-        /* --- START BUTTON --- */
-        #start-overlay {
-            position: absolute;
-            z-index: 100;
-            background: rgba(0,0,0,0.8);
-            width: 100%;
-            height: 100%;
+        /* --- START OVERLAY --- */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
 
-        #play-button {
-            padding: 20px 40px;
+        button {
+            padding: 20px 50px;
             font-size: 24px;
-            background: #00ffcc;
+            background: #ff00ff;
+            color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
+            box-shadow: 0 0 30px #ff00ff;
             font-weight: bold;
-            box-shadow: 0 0 20px #00ffcc;
         }
 
-        /* --- THE DANCING CAT --- */
-        .cat-container {
+        /* --- THE CAT --- */
+        .cat-box {
             position: relative;
-            width: 200px;
-            height: 200px;
-            transition: transform 0.1s ease-out;
+            width: 250px;
+            height: 250px;
+            display: none; /* Hidden until start */
         }
 
         #cat-svg {
             width: 100%;
             height: 100%;
-            filter: drop-shadow(0 0 15px #00ffcc);
+            filter: drop-shadow(0 0 20px #00ffcc);
         }
 
-        /* Body Movement Animations */
-        .dancing #cat-svg {
-            animation: catDance 0.45s infinite alternate ease-in-out;
+        /* Dance Animation */
+        .dance-active {
+            animation: bounce 0.45s infinite alternate ease-in-out;
         }
 
-        @keyframes catDance {
-            0% { transform: scale(1.1, 0.9) translateY(10px); }
-            100% { transform: scale(0.9, 1.1) translateY(-30px) rotate(5deg); }
+        @keyframes bounce {
+            0% { transform: scale(1.1, 0.8) translateY(20px); }
+            100% { transform: scale(0.9, 1.2) translateY(-40px); }
         }
 
-        /* Background Glow */
-        .bg-glow {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(0,255,204,0.3) 0%, transparent 70%);
-            z-index: -1;
+        #volume-control {
+            margin-top: 20px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay">
-        <button id="play-button" onclick="startTheParty()">CLICK TO START HOOKAH BAR</button>
+    <div id="overlay">
+        <button onclick="playMusic()">START PARTY</button>
     </div>
 
-    <div class="bg-glow" id="glow"></div>
-
-    <div class="cat-container" id="container">
+    <div class="cat-box" id="cat-box">
         <svg id="cat-svg" viewBox="0 0 100 100">
-            <path id="body-color" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffcc" />
+            <path id="cat-body" d="M50 20 C 30 20, 20 35, 20 55 C 20 75, 30 90, 50 90 C 70 90, 80 75, 80 55 C 80 35, 70 20, 50 20" fill="#00ffcc" />
             <path d="M30 30 L 15 5 L 45 25 Z" fill="#00ffcc" />
             <path d="M70 30 L 85 5 L 55 25 Z" fill="#00ffcc" />
             <circle cx="40" cy="50" r="4" fill="#111" />
@@ -94,39 +88,57 @@
         </svg>
     </div>
 
-    <audio id="party-music" loop>
+    <div id="volume-control">
+        <label>Volume: </label>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.1" value="0.8">
+    </div>
+
+    <audio id="track" loop>
         <source src="http://googleusercontent.com/file_content/18" type="audio/mpeg">
     </audio>
 
     <script>
-        const music = document.getElementById('party-music');
-        const overlay = document.getElementById('start-overlay');
-        const container = document.getElementById('container');
-        const bodyColor = document.getElementById('body-color');
-        const glow = document.getElementById('glow');
+        const track = document.getElementById('track');
+        const catBox = document.getElementById('cat-box');
+        const overlay = document.getElementById('overlay');
+        const slider = document.getElementById('vol-slider');
 
-        const neonColors = ['#00ffcc', '#ff00ff', '#ffff00', '#ff3300'];
-
-        function startTheParty() {
-            // 1. Hide the overlay
+        function playMusic() {
+            // Hide Overlay
             overlay.style.display = 'none';
+            catBox.style.display = 'block';
+            document.getElementById('volume-control').style.display = 'block';
+
+            // Set Volume
+            track.volume = 0.8;
             
-            // 2. Play the music
-            music.play().catch(error => {
-                console.log("Music failed to play: ", error);
-                alert("Please ensure your volume is up!");
-            });
+            // Try to Play
+            const playPromise = track.play();
 
-            // 3. Start animations
-            container.classList.add('dancing');
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    // Music started! Start the dance
+                    catBox.classList.add('dance-active');
+                    startColorFlash();
+                }).catch(error => {
+                    console.log("Playback failed:", error);
+                    alert("Browser blocked audio. Please click the screen again!");
+                });
+            }
+        }
 
-            // 4. Color sync loop
+        slider.addEventListener('input', (e) => {
+            track.volume = e.target.value;
+        });
+
+        function startColorFlash() {
+            const colors = ['#00ffcc', '#ff00ff', '#ffff00', '#ff3300'];
+            const body = document.getElementById('cat-body');
             setInterval(() => {
-                const randomColor = neonColors[Math.floor(Math.random() * neonColors.length)];
-                bodyColor.setAttribute('fill', randomColor);
-                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 20px ${randomColor})`;
-                glow.style.background = `radial-gradient(circle, ${randomColor}44 0%, transparent 70%)`;
-            }, 450); // Matches the dance beat
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                body.setAttribute('fill', color);
+                document.getElementById('cat-svg').style.filter = `drop-shadow(0 0 30px ${color})`;
+            }, 450);
         }
     </script>
 </body>
